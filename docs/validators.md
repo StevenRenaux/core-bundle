@@ -64,7 +64,7 @@ error message should be displayed in debug mode when validating.
     public $recaptcha;
 
     // Or if you need technical details about why the captcha is invalid:
-    #[LeaptAssert\RecaptchaV3(message: LeaptAssert\RecaptchaV3::$technicalMessage)]
+    #[LeaptAssert\RecaptchaV3(message: LeaptAssert\RecaptchaV3::TECHNICAL_MESSAGE)]
     public $recaptcha;
     ```
 

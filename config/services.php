@@ -187,7 +187,6 @@ return static function (ContainerConfigurator $container): void {
             ->arg('$secretKey', param('leapt_core.recaptcha.private_key'))
             ->arg('$scoreThreshold', param('leapt_core.recaptcha.score_threshold'))
             ->arg('$requestStack', service('request_stack'))
-            ->arg('$logger', service('logger'))
             ->tag('validator.constraint_validator', ['alias' => 'leapt_core.recaptcha_v3'])
     ;
 };

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Leapt\CoreBundle\Validator\Constraints;
 
-use Psr\Log\LoggerInterface;
 use ReCaptcha\ReCaptcha;
 use ReCaptcha\Response;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -24,7 +23,6 @@ class RecaptchaV3Validator extends ConstraintValidator
         ?string $secretKey,
         private float $scoreThreshold,
         private RequestStack $requestStack,
-        private LoggerInterface $logger,
     ) {
         $this->secretKey = $secretKey;
     }
@@ -52,35 +50,24 @@ class RecaptchaV3Validator extends ConstraintValidator
         }
 
         $response = $this->verifyToken($value);
-        if ($response?->isSuccess()) {
+        if ($response->isSuccess()) {
             return;
         }
 
         $this->context->buildViolation($constraint->message)
             ->setParameter('{{ string }}', $this->formatValue($value))
-            ->setParameter('{{ score }}', $this->formatValue($response?->getScore()))
-            ->setParameter('{{ errorCodes }}', $this->formatValues($response?->getErrorCodes() ?? []))
+            ->setParameter('{{ score }}', $this->formatValue($response->getScore()))
+            ->setParameter('{{ errorCodes }}', $this->formatValues($response->getErrorCodes()))
             ->addViolation();
     }
 
-    private function verifyToken(string $token): ?Response
+    private function verifyToken(string $token): Response
     {
-        try {
-            $remoteIp = $this->requestStack->getCurrentRequest()->getClientIp();
-            $recaptcha = new ReCaptcha($this->secretKey);
+        $remoteIp = $this->requestStack->getCurrentRequest()?->getClientIp();
+        $recaptcha = new ReCaptcha($this->secretKey);
 
-            return $recaptcha
-                ->setScoreThreshold($this->scoreThreshold)
-                ->verify($token, $remoteIp);
-        } catch (\Exception $exception) {
-            $this->logger->error(
-                'reCAPTCHA validator error: ' . $exception->getMessage(),
-                [
-                    'exception' => $exception,
-                ],
-            );
-
-            return null;
-        }
+        return $recaptcha
+            ->setScoreThreshold($this->scoreThreshold)
+            ->verify($token, $remoteIp);
     }
 }
